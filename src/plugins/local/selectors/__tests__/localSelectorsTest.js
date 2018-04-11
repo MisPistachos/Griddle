@@ -4,9 +4,9 @@ import Immutable from 'immutable';
 import * as selectors from '../localSelectors';
 
 test('gets data', test => {
-    const state = new Immutable.Map({ data: 'hi' });
+  const state = new Immutable.Map({ data: 'hi' });
 
-    test.deepEqual(selectors.dataSelector(state), 'hi');
+  test.deepEqual(selectors.dataSelector(state), 'hi');
 });
 
 test('gets current page', test => {
@@ -65,8 +65,8 @@ test('gets empty string when filter not present', test => {
 test('gets sort properties', test => {
   const state = new Immutable.fromJS({
     sortProperties: [
-    { id: 'one', sortAscending: true },
-    { id: 'two', sortAscending: false }
+      { id: 'one', sortAscending: true },
+      { id: 'two', sortAscending: false }
     ]
   });
 
@@ -113,7 +113,7 @@ test('gets column orders', test => {
 test('gets visible columns when columns specified without order', test => {
   const state = new Immutable.fromJS({
     data: [
-      { one: 'hi', two: 'hello', three: 'this should not show up'}
+      { one: 'hi', two: 'hello', three: 'this should not show up' }
     ],
     renderProperties: {
       columnProperties: {
@@ -129,7 +129,7 @@ test('gets visible columns when columns specified without order', test => {
 test('gets visible columns in order when columns specified', test => {
   const state = new Immutable.fromJS({
     data: [
-      { one: 'hi', two: 'hello', three: 'this should not show up'}
+      { one: 'hi', two: 'hello', three: 'this should not show up' }
     ],
     renderProperties: {
       columnProperties: {
@@ -145,7 +145,7 @@ test('gets visible columns in order when columns specified', test => {
 test('gets all columns as visible columns when no columns specified', test => {
   const state = new Immutable.fromJS({
     data: [
-      { one: 'hi', two: 'hello', three: 'this should not show up'}
+      { one: 'hi', two: 'hello', three: 'this should not show up' }
     ]
   });
 
@@ -175,7 +175,7 @@ test('hasNextSelector returns true when more pages', test => {
 
 test('hasNextSelector returns false when no more pages', test => {
   const state = new Immutable.fromJS({
-     data: [
+    data: [
       { one: 1 },
       { two: 2 },
       { three: 3 },
@@ -242,6 +242,54 @@ test('filteredDataSelector filters data when filter string present', test => {
   ]);
 });
 
+test('filteredDataSelector filters data when filter function present', test => {
+  const state = new Immutable.fromJS({
+    filter: function (row) {
+      return row.get("name") === 'luke skywalker';
+    },
+    data: [
+      { id: '1', name: 'luke skywalker' },
+      { id: '2', name: 'han solo' }
+    ]
+  });
+
+  test.deepEqual(selectors.filteredDataSelector(state).toJSON(), [
+    { id: '1', name: 'luke skywalker' }
+  ]);
+});
+
+test('filteredDataSelector filters data when filter object present', test => {
+  const state = Immutable.Map({
+    filter: { name: 'luke' },
+    data: Immutable.List.of(
+      Immutable.Map({ id: '1', name: 'luke skywalker' }),
+      Immutable.Map({ id: '2', name: 'han solo' })
+    )
+  })
+  test.deepEqual(selectors.filteredDataSelector(state).toJSON(), [
+    { id: '1', name: 'luke skywalker' }
+  ]);
+});
+
+test('filteredDataSelector filters data when filter object with filter function', test => {
+  const state = Immutable.Map({
+    filter: {
+      name: function (rowName) {
+        return rowName.length === 14
+      }
+    },
+    data: Immutable.List.of(
+      Immutable.Map({ id: '1', name: 'luke skywalker' }),
+      Immutable.Map({ id: '2', name: 'han solo' })
+    )
+  })
+
+  test.deepEqual(selectors.filteredDataSelector(state).toJSON(), [
+    { id: '1', name: 'luke skywalker' }
+  ]);
+});
+
+
 test('filteredDataSelector filters data respecting filterable', test => {
   const state = new Immutable.fromJS({
     renderProperties: {
@@ -249,52 +297,18 @@ test('filteredDataSelector filters data respecting filterable', test => {
         name: {
           filterable: false,
         },
-        weapon: {
-          filterable: true,
-        }
       }
     },
     filter: 'H',
     data: [
       { id: '1', name: 'luke skywalker', weapon: 'light saber' },
-      { id: '2', name: 'han solo', weapon: 'blaster' },
+      { id: '2', name: 'han solo', weapon: 'blaster' }
     ]
   });
 
   test.deepEqual(selectors.filteredDataSelector(state).toJSON(), [
     { id: '1', name: 'luke skywalker', weapon: 'light saber' }
   ]);
-});
-
-test('filteredDataSelector matches ColumnDefinition fields only', test => {
-  const state = new Immutable.fromJS({
-    renderProperties: {
-      columnProperties: {
-        weapon: null,
-      }
-    },
-    filter: 'H',
-    data: [
-      { id: '1', name: 'luke skywalker', weapon: 'light saber' },
-      { id: '2', name: 'han solo', weapon: 'blaster' },
-    ]
-  });
-
-  test.deepEqual(selectors.filteredDataSelector(state).toJSON(), [
-    { id: '1', name: 'luke skywalker', weapon: 'light saber' }
-  ]);
-});
-
-test('filteredDataSelector ignores griddleKey matches', test => {
-  const state = new Immutable.fromJS({
-    filter: '1',
-    data: [
-      { griddleKey: '11', name: 'luke skywalker' },
-      { griddleKey: '12', name: 'han solo' }
-    ]
-  });
-
-  test.deepEqual(selectors.filteredDataSelector(state).toJSON(), []);
 });
 
 test('sortedDataSelector uses default sort if no sort method specifed for column', test => {
@@ -348,7 +362,7 @@ test('sortedDataSelector works with multiple sortOptions', test => {
       { id: '1', name: 'luke skywalker', food: 'orange' },
       { id: '2', name: 'han solo', food: 'banana' },
       { id: '3', name: 'han solo', food: 'apple' },
-      { id: '4', name: 'luke skywalker', food: 'apple'}
+      { id: '4', name: 'luke skywalker', food: 'apple' }
     ],
     sortProperties: [
       { id: 'name', sortAscending: true },
@@ -370,7 +384,7 @@ test('current page data selector gets correct page', test => {
       { id: '1', name: 'luke skywalker', food: 'orange' },
       { id: '2', name: 'han solo', food: 'banana' },
       { id: '3', name: 'han solo', food: 'apple' },
-      { id: '4', name: 'luke skywalker', food: 'apple'}
+      { id: '4', name: 'luke skywalker', food: 'apple' }
     ],
     pageProperties: {
       currentPage: 3,
@@ -387,7 +401,7 @@ test('visible data selector gets only visible columns', test => {
       { id: '1', name: 'luke skywalker', food: 'orange' },
       { id: '2', name: 'han solo', food: 'banana' },
       { id: '3', name: 'han solo', food: 'apple' },
-      { id: '4', name: 'luke skywalker', food: 'apple'}
+      { id: '4', name: 'luke skywalker', food: 'apple' }
     ],
     renderProperties: {
       columnProperties: {
@@ -414,7 +428,7 @@ test('visibleRowIdsSelector gets row ids', test => {
       { id: '1', name: 'luke skywalker', food: 'orange', griddleKey: 1 },
       { id: '2', name: 'han solo', food: 'banana', griddleKey: 2 },
       { id: '3', name: 'han solo', food: 'apple', griddleKey: 3 },
-      { id: '4', name: 'luke skywalker', food: 'apple', griddleKey: 4}
+      { id: '4', name: 'luke skywalker', food: 'apple', griddleKey: 4 }
     ],
     renderProperties: {
       columnProperties: {
@@ -438,7 +452,7 @@ test('hidden columns selector shows all columns that are not visible', test => {
       { id: '1', name: 'luke skywalker', food: 'orange' },
       { id: '2', name: 'han solo', food: 'banana' },
       { id: '3', name: 'han solo', food: 'apple' },
-      { id: '4', name: 'luke skywalker', food: 'apple'}
+      { id: '4', name: 'luke skywalker', food: 'apple' }
     ],
     renderProperties: {
       columnProperties: {
@@ -457,12 +471,12 @@ test('hidden columns selector shows all columns that are not visible', test => {
 });
 
 test('columnIdsSelector gets all column ids', test => {
-    const state = new Immutable.fromJS({
+  const state = new Immutable.fromJS({
     data: [
       { id: '1', name: 'luke skywalker', food: 'orange' },
       { id: '2', name: 'han solo', food: 'banana' },
       { id: '3', name: 'han solo', food: 'apple' },
-      { id: '4', name: 'luke skywalker', food: 'apple'}
+      { id: '4', name: 'luke skywalker', food: 'apple' }
     ],
     renderProperties: {
       columnProperties: {
@@ -495,7 +509,7 @@ test('columnTitlesSelector gets all column titles', test => {
       { id: '1', name: 'luke skywalker', food: 'orange' },
       { id: '2', name: 'han solo', food: 'banana' },
       { id: '3', name: 'han solo', food: 'apple' },
-      { id: '4', name: 'luke skywalker', food: 'apple'}
+      { id: '4', name: 'luke skywalker', food: 'apple' }
     ],
     renderProperties: {
       columnProperties: {
